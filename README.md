@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/hanwckf/rt-n56u.svg?branch=master)](https://travis-ci.com/hanwckf/rt-n56u)
+![CI](https://github.com/hanwckf/rt-n56u/workflows/CI/badge.svg)
 ![GitHub All Releases](https://img.shields.io/github/downloads/hanwckf/rt-n56u/total)
 [![release](https://img.shields.io/github/release/hanwckf/rt-n56u.svg)](https://github.com/hanwckf/rt-n56u/releases)
 
@@ -60,10 +60,12 @@ Contributors of this project are not responsible for what happens next.
 >- [mtr](https://github.com/traviscross/mtr) ```CONFIG_FIRMWARE_INCLUDE_MTR```
 >- [socat](http://www.dest-unreach.org/socat) ```CONFIG_FIRMWARE_INCLUDE_SOCAT```
 >- [srelay](https://socks-relay.sourceforge.io) ```CONFIG_FIRMWARE_INCLUDE_SRELAY```
+>- [3proxy](https://github.com/z3APA3A/3proxy) ```CONFIG_FIRMWARE_INCLUDE_3PROXY```
 >- [mentohust](https://github.com/hanwckf/mentohust-1) ```CONFIG_FIRMWARE_INCLUDE_MENTOHUST```
 >- [frpc](https://github.com/fatedier/frp) ```CONFIG_FIRMWARE_INCLUDE_FRPC```
 >- [frps](https://github.com/fatedier/frp) ```CONFIG_FIRMWARE_INCLUDE_FRPS```
 >- [tunsafe](https://github.com/TunSafe/TunSafe) ```CONFIG_FIRMWARE_INCLUDE_TUNSAFE```
+>- [wireguard-go](https://git.zx2c4.com/wireguard-go/) ```CONFIG_FIRMWARE_INCLUDE_WIREGUARD```
 
 - 已适配除官方适配外的以下机型
 >- PSG1208
@@ -96,7 +98,8 @@ Contributors of this project are not responsible for what happens next.
 >- MR2600 (USB)
 >- WDR7300
 >- RM2100
->- R2100 
+>- R2100
+>- JCG-Y2(USB)
 >- E8820V2(USB)
 >- MSG1500(USB)
 
@@ -109,22 +112,34 @@ Contributors of this project are not responsible for what happens next.
 ```shell
 # Debian/Ubuntu
 sudo apt update
-sudo apt install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
-cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
-pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget \
-module-init-tools
+sudo apt install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd \
+	fakeroot kmod cpio git python-docutils gettext automake autopoint \
+	texinfo build-essential help2man pkg-config zlib1g-dev libgmp3-dev \
+	libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
+
+# Archlinux/Manjaro
+sudo pacman -Syu --needed git base-devel cmake gperf ncurses libmpc \
+        gmp python-docutils vim rpcsvc-proto fakeroot cpio help2man
+
+# Alpine
+sudo apk add make gcc g++ cpio curl wget nano xxd kmod \
+	pkgconfig rpcgen fakeroot ncurses bash patch \
+	bsd-compat-headers python2 python3 zlib-dev \
+	automake gettext gettext-dev autoconf bison \
+	flex coreutils cmake git libtool gawk sudo
 
 # CentOS 7
 sudo yum update
-sudo yum install ncurses-* flex byacc bison zlib-* texinfo gmp-* mpfr-* gettext \
-libtool* libmpc-* gettext-* python-docutils nano help2man fakeroot
 sudo yum groupinstall "Development Tools"
+sudo yum install ncurses-* flex byacc bison zlib-* texinfo gmp-* mpfr-* gettext \
+	libtool* libmpc-* gettext-* python-docutils nano help2man fakeroot
 
 # CentOS 8
 sudo yum update
-sudo yum install ncurses-* flex byacc bison zlib-* gmp-* mpfr-* gettext \
-libtool* libmpc-* gettext-* nano fakeroot
 sudo yum groupinstall "Development Tools"
+sudo yum install ncurses-* flex byacc bison zlib-* gmp-* mpfr-* gettext \
+	libtool* libmpc-* gettext-* nano fakeroot
+
 # CentOS 8不能直接通过yum安装texinfo，help2man，python-docutils。请去官网下载发行的安装包编译安装
 # 以texinfo为例
 # cd /usr/local/src
@@ -134,10 +149,6 @@ sudo yum groupinstall "Development Tools"
 # sudo ./configure
 # sudo make
 # sudo make install
-
-# Archlinux/Manjaro
-sudo pacman -Syu --needed git base-devel cmake gperf ncurses libmpc gmp python-docutils \
-vim rpcsvc-proto fakeroot cpio
 
 ```
 
@@ -157,10 +168,6 @@ cd /opt/rt-n56u/toolchain-mipsel
 sh dl_toolchain.sh
 
 # 或者，也可以从源码编译工具链，这需要一些时间：
-# Manjaro/ArchLinux 用户请使用gcc-8
-# sudo pacman -S gcc8
-# sudo ln -sf /usr/bin/gcc-8 /usr/local/bin/gcc
-# sudo ln -sf /usr/bin/g++-8 /usr/local/bin/g++
 ./clean_toolchain
 ./build_toolchain
 
@@ -177,6 +184,7 @@ nano /opt/rt-n56u/trunk/configs/templates/PSG1218.config
 ```shell
 cd /opt/rt-n56u/trunk
 ./clear_tree
+# 对于WSL环境，建议使用sudo进行编译，或者使用fakeroot-tcp代替fakeroot
 fakeroot ./build_firmware_modify PSG1218
 # 脚本第一个参数为路由型号，在trunk/configs/templates/中
 # 编译好的固件在trunk/images里
