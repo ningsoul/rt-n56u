@@ -5,6 +5,11 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        required: false
+        default: 'no'
   release:
     types: [published]
 
@@ -26,21 +31,26 @@ jobs:
           - build_variant: "mt7628"
             targets: "HC5861B MI-NANO MZ-R13 MZ-R13P 360P2 HC5761A HC5661A"
           - build_variant: "mt7621"
-            targets: "K2P_nano-5.0 K2P-5.0 DIR-878-5.0 RM2100"
+            targets: "K2P_nano K2P DIR-878 RM2100 CR660x"
           - build_variant: "mt7621-usb"
-            targets: "JCG-836PRO-5.0 JCG-AC860M-5.0 JCG-Y2-5.0 DIR-882-5.0 A3004NS MSG1500 WR1200JS MI-R3G NEWIFI3 B70"
+            targets: "XY-C1 JCG-836PRO JCG-AC860M JCG-Y2 DIR-882 A3004NS MSG1500 WR1200JS MI-R3G NEWIFI3 B70"
     steps:
       - uses: actions/checkout@v2
       - name: Prepare environment
         run: |
           sudo apt update
-          sudo apt install libtool-bin gperf python-docutils autopoint gettext
+          sudo apt install libtool-bin gperf python3-docutils autopoint gettext
       - name: Run shellcheck
         run: sh ./trunk/tools/shellcheck.sh
       - name: Prepare toolchain
         run: |
           cd toolchain-mipsel
           sh dl_toolchain.sh
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'yes' }}
+        with:
+          limit-access-to-actor: true
       - name: Start build
         run: |
           cd trunk
